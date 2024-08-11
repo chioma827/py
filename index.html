@@ -1,0 +1,118 @@
+import random
+import psycopg2
+from psycopg2 import sql
+from collections import Counter
+
+# Sample color data from the table
+color_data = {
+"MONDAY": "GREEN, YELLOW, GREEN, BROWN, BLUE, PINK, BLUE, YELLOW, ORANGE, CREAM, ORANGE, RED, WHITE, BLUE, WHITE, BLUE,
+BLUE, BLUE, GREEN",
+"TUESDAY": "ARSH, BROWN, GREEN, BROWN, BLUE, BLUE, BLEW, PINK, PINK, ORANGE, ORANGE, RED, WHITE, BLUE, WHITE, WHITE,
+BLUE, BLUE, BLUE",
+"WEDNESDAY": "GREEN, YELLOW, GREEN, BROWN, BLUE, PINK, RED, YELLOW, ORANGE, RED, ORANGE, RED, BLUE, BLUE, WHITE, BLUE,
+BLUE, WHITE, WHITE",
+"THURSDAY": "BLUE, BLUE, GREEN, WHITE, BLUE, BROWN, PINK, YELLOW, ORANGE, CREAM, ORANGE, RED, WHITE, BLUE, WHITE, BLUE,
+BLUE, BLUE, GREEN",
+"FRIDAY": "GREEN, WHITE, GREEN, BROWN, BLUE, BLUE, BLACK, WHITE, ORANGE, RED, RED, RED, WHITE, BLUE, WHITE, BLUE, BLUE,
+BLUE, WHITE"
+}
+
+# Collect all colors
+color_list = []
+for colors in color_data.values():
+color_list.extend(colors.split(", "))
+
+# Count frequencies
+color_counts = Counter(color_list)
+
+# 1. Mean Color (Most Common Color)
+most_common_color = color_counts.most_common(1)[0][0]
+print(f'Most Common Color (Mean Color): {most_common_color}')
+
+# 2. Mostly Worn Color
+print(f'Most Worn Color Throughout the Week: {most_common_color}')
+
+# 3. Median Color
+sorted_colors = sorted(color_counts.items(), key=lambda x: x[0]) # Sort by color names (or counts)
+median_color = sorted_colors[len(sorted_colors) // 2][0] # Simple median for odd-sized lists
+print(f'Median Color: {median_color}')
+
+# 4. Variance of Colors
+frequencies = list(color_counts.values())
+mean_frequency = sum(frequencies) / len(frequencies)
+variance = sum((x - mean_frequency) ** 2 for x in frequencies) / len(frequencies)
+print(f'Variance of Colors: {variance}')
+
+# 5. Probability that the Color is Red
+total_colors = sum(frequencies)
+red_count = color_counts.get('RED', 0)
+probability_red = red_count / total_colors if total_colors > 0 else 0
+print(f'Probability of Red Color: {probability_red}')
+
+# 6. Save Colors and Their Frequencies in PostgreSQL Database
+try:
+connection = psycopg2.connect(
+dbname='your_db_name',
+user='your_username',
+password='your_password',
+host='localhost',
+port='5432'
+)
+cursor = connection.cursor()
+
+cursor.execute("CREATE TABLE IF NOT EXISTS colors (color VARCHAR PRIMARY KEY, frequency INT);")
+
+# Insert colors and their frequencies
+for color, frequency in color_counts.items():
+cursor.execute(
+sql.SQL("INSERT INTO colors (color, frequency) VALUES (%s, %s) ON CONFLICT (color) DO UPDATE SET frequency =
+excluded.frequency + %s;"),
+(color, frequency, frequency)
+)
+
+connection.commit()
+print("Color frequencies saved to PostgreSQL successfully.")
+except Exception as e:
+print(f"Error saving to database: {e}")
+finally:
+if connection:
+cursor.close()
+connection.close()
+
+# 7. Recursive Searching Algorithm
+def recursive_search(lst, target, index=0):
+if index >= len(lst):
+return -1
+if lst[index] == target:
+return index
+return recursive_search(lst, target, index + 1)
+
+# Example of Recursive Search
+numbers_list = [1, 2, 3, 4, 5]
+target_number = 3
+search_result = recursive_search(numbers_list, target_number)
+print(f'Recursive Search Result Index: {search_result}')
+
+# 8. Generate Random 4 Digits Number of 0s and 1s and Convert to Base 10
+binary_number = ''.join(random.choices('01', k=4))
+decimal_value = int(binary_number, 2)
+print(f'Generated Binary Number: {binary_number}, Decimal Value: {decimal_value}')
+
+# 9. Sum the First 50 Fibonacci Numbers
+def fibonacci(n):
+a, b = 0, 1
+total = 0
+for _ in range(n):
+total += a
+a, b = b, a + b
+return total
+
+sum_fibonacci = fibonacci(50)
+print(f'Sum of the First 50 Fibonacci Numbers: {sum_fibonacci}')
+Explanation
+Color Data Parsing: The colors are counted from a hardcoded source representing your table.
+Color Frequency Calculations: Various calculations including most common (mean), median, and variance of the colors are
+implemented using the Counter class from collections.
+Database Connection: The PostgreSQL part requires psycopg2. Adjust your credentials as necessary.
+Recursive Search Function: Defined to search for a target number in a list.
+Random Number Generation: A function generates a random binary number and converts it to decimal.
