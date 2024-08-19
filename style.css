@@ -1,0 +1,30 @@
+body {  
+    font-family: Arial, sans-serif;
+     
+}  
+
+.header {  
+    background-color: #f8f9fa;  
+    padding: 100px 0;  
+}  
+
+.hero {  
+    background-color: aliceblue;
+    padding: 50px 0;  
+}  
+
+.hero h1 {  
+    font-size: 2.5rem;  
+}  
+
+.container {  
+    padding: 20px;  
+   
+}  
+
+footer {  
+    background-color: #f1f1f1;  
+    position: relative;  
+    bottom: 0;  
+    width: 100%;  
+}
